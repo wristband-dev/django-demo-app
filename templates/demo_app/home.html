@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="display-5">Welcome to Django Demo</h1>
+        </div>
+        <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
+        {% if wristband %}
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">🎉 You're authenticated!</h4>
+                <p>Welcome <strong>{{ wristband.user_info.email }}</strong>! You're logged into tenant <strong>{{ wristband.tenant_domain_name }}</strong>.</p>
+                <hr>
+                <p class="mb-0">Explore the protected pages below - your session will stay active as long as you're using the app.</p>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">🔐 Authentication Ready</h4>
+                <p>This demo shows Wristband auth integration with Django. Click "Login with Wristband" to see the full auth flow!</p>
+            </div>
+        {% endif %}
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">👋 Hello World</h5>
+                        <p class="card-text">Test out an AJAX API request.</p>
+                        <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
+                        {% if wristband %}
+                            <a href="{% url 'demo_app:hello_world' %}" class="btn btn-primary">Say Hello</a>
+                        {% else %}
+                            <a href="/auth/login/" class="btn btn-outline-primary">Login to Access</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">👤 Profile</h5>
+                        <p class="card-text">View your user profile and token info.</p>
+                        <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
+                        {% if wristband %}
+                            <a href="{% url 'demo_app:profile' %}" class="btn btn-primary">View Profile</a>
+                        {% else %}
+                            <a href="/auth/login/" class="btn btn-outline-primary">Login to Access</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="feature-list mt-4">
+            <h3>🎯 What This App Demonstrates</h3>
+            <ul>
+                <li>✅ <strong>Auth middleware</strong> protecting the view</li>
+                <li>✅ <strong>User/tenant information</strong> from Wristband in template context</li>
+                <li>✅ <strong>Access token</strong> available for API calls</li>
+                <li>✅ <strong>Automatic redirect</strong> to login if not authenticated</li>
+                <li>✅ <strong>Rolling sessions</strong> - stay logged in while active</li>
+                <li>✅ <strong>Token refresh</strong> - middleware handles expired tokens</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

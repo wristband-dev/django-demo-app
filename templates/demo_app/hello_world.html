@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="display-5">👋 Hello World!</h1>
+        </div>
+
+        <div class="alert alert-success">
+            <strong>🔒 Protected Page:</strong> 
+            You can only see this page because you're authenticated through Wristband!
+        </div>
+
+        <div class="row">
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">⚡ Test API Endpoint</h5>
+                    <p class="card-text">Make an AJAX call to the protected API endpoint that returns JSON data with your user information.</p>
+                    <button id="apiCallBtn" class="btn btn-primary btn-lg">Call API Endpoint</button>
+                    <div id="apiResult" class="mt-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <pre id="apiResponse"></pre>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-3">
+                        <small>This AJAX call automatically includes your session and CSRF token via middleware protection.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'demo_app:home' %}" class="btn btn-secondary me-2">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('apiCallBtn').addEventListener('click', async function() {
+    const btn = this;
+    const resultDiv = document.getElementById('apiResult');
+    const responseDiv = document.getElementById('apiResponse');
+    
+    // Show loading state
+    btn.disabled = true;
+    btn.textContent = 'Calling API...';
+    
+    try {
+        const response = await fetch('{% url "demo_app:api_hello" %}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ action: 'hello' })
+        });
+
+        // Check for 401 or 403 and redirect to login
+        if (response.status === 401 || response.status === 403) {
+            const loginUrl = new URL('{% url "demo_app:login" %}', window.location.origin);
+            loginUrl.searchParams.set('return_url', window.location.href);
+
+            // __WRISTBAND__: Use the current session's tenant domain if available at time of redirect.
+            const tenantDomain = '{{ wristband.tenant_domain_name|default:"" }}';
+            if (tenantDomain) {
+                loginUrl.searchParams.set('tenant_domain', tenantDomain);
+            }
+
+            window.location.href = loginUrl.toString();
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Show result
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.style.display = 'block';
+        
+        btn.textContent = 'Call API Endpoint';
+        btn.disabled = false;
+    } catch (error) {
+        responseDiv.textContent = 'Error: ' + error.message;
+        resultDiv.style.display = 'block';
+        
+        btn.textContent = 'Call API Endpoint';
+        btn.disabled = false;
+    }
+});
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [key, value] = cookie.trim().split('=');
+        if (key === name) return value;
+    }
+    return '';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wristband-django-demo-app"
+version = "0.1.0"
+description = "Django demo application showcasing Wristband multi-tenant authentication"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Wristband", email = "support@wristband.dev"},
+]
+requires-python = ">=3.9"
+dependencies = [
+    "cryptography>=44.0.3,<45.0.0",
+    "Django>=4.2,<6.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "httpx>=0.24.0",
+    "uvicorn[standard]>=0.24.0",
+    "gunicorn>=21.0.0",
+    # __WRISTBAND__
+    "wristband-django-auth>=0.1.0",
+]
+keywords = [
+    "django",
+    "demo",
+    "wristband",
+    "authentication",
+    "multi-tenant"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "setuptools>=61",
+    "mypy>=1.10.0",
+    "types-jsonschema",
+    "django-stubs",
+    "flake8>=6.0.0,<7.0.0",
+    "flake8-pyproject>=1.2.0",
+    "pip-audit>=2.0.0",
+    "bandit>=1.7.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+]
+
+[project.urls]
+"Homepage" = "https://wristband.dev"
+"Repository" = "https://github.com/wristband-dev/django-demo-app"
+"Documentation" = "https://docs.wristband.dev"
+
+# Tool configurations
+[tool.black]
+line-length = 120
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203", "W503"]
+
+[tool.setuptools]
+packages = ["demo_app", "demo_project"]
+include-package-data = true
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+exclude = ["venv/", "migrations/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "dotenv",
+]
+ignore_missing_imports = true
