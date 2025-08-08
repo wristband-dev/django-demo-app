@@ -12,8 +12,8 @@
 # - Any environment with real user data
 #
 # This exists solely because local Wristband development environments
-# don't have valid SSL certificates, similar to how Node.js developers
-# use NODE_TLS_REJECT_UNAUTHORIZED=0 for local development.
+# may not have valid SSL certificates, and it is similar to how Node
+# developers use NODE_TLS_REJECT_UNAUTHORIZED=0 for local development.
 # ====================================================================
 import logging
 from typing import Any, Callable
