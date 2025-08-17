@@ -13,14 +13,15 @@ authors = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "cryptography>=44.0.3,<45.0.0",
-    "Django>=4.2,<6.0",
-    "python-dotenv>=1.0.0,<2.0.0",
+    "cryptography>=44.0.3",
+    "Django>=4.2",
+    "python-dotenv>=1.0.0",
     "httpx>=0.24.0",
     "uvicorn[standard]>=0.24.0",
     "gunicorn>=21.0.0",
     # __WRISTBAND__
-    "wristband-django-auth>=0.1.0",
+    "wristband-django-auth>=0.1.1",
+    "wristband-python-jwt>=0.1.0",
 ]
 keywords = [
     "django",

@@ -92,7 +92,7 @@ make install
 While still in the root directory, you can start the demo application with:
 
 ```bash
-make dev
+make run
 ```
 
 ### 6) Cleaning up

@@ -12,20 +12,58 @@
             You can only see this page because you're authenticated through Wristband!
         </div>
 
-        <div class="row">
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">⚡ Test API Endpoint</h5>
-                    <p class="card-text">Make an AJAX call to the protected API endpoint that returns JSON data with your user information.</p>
-                    <button id="apiCallBtn" class="btn btn-primary btn-lg">Call API Endpoint</button>
-                    <div id="apiResult" class="mt-3" style="display: none;">
-                        <div class="alert alert-info">
-                            <pre id="apiResponse"></pre>
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">⚡ Test API Endpoints</h5>
+                <p class="card-text">Compare different authentication methods for API calls.</p>
+                
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="cookie-tab" role="tab">
+                            🍪 Test with Cookie
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="token-tab" role="tab">
+                            🔑 Test with Token
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content mt-3">
+                    <!-- Cookie Authentication Tab -->
+                    <div class="tab-pane active" id="cookie-pane">
+                        <div class="p-3">
+                            <h6>Session Cookie + CSRF Authentication</h6>
+                            <p class="text-muted mb-3">
+                                <small>API authentication using session cookies and CSRF protection.</small>
+                            </p>
+                            <button id="cookieApiBtn" class="btn btn-primary">Call Cookie API</button>
+                            <div id="cookieApiResult" class="mt-3" style="display: none;">
+                                <div class="alert alert-info">
+                                    <pre id="cookieApiResponse"></pre>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-muted mt-3">
-                        <small>This AJAX call automatically includes your session and CSRF token via middleware protection.</small>
-                    </p>
+                    
+                    <!-- Token Authentication Tab -->
+                    <div class="tab-pane" id="token-pane" style="display: none;">
+                        <div class="p-3">
+                            <h6>JWT Bearer Token Authentication</h6>
+                            <p class="text-muted mb-3">
+                                <small>API authentication using JWT bearer tokens.</small>
+                            </p>
+                            <button id="tokenApiBtn" class="btn btn-success">Call Token API</button>
+                            <div id="tokenApiResult" class="mt-3" style="display: none;">
+                                <div class="alert alert-info">
+                                    <pre id="tokenApiResponse"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -37,17 +75,47 @@
 </div>
 
 <script>
-document.getElementById('apiCallBtn').addEventListener('click', async function() {
+// Simple tab functionality
+document.getElementById('cookie-tab').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Update tab active states
+    document.getElementById('cookie-tab').classList.add('active');
+    document.getElementById('token-tab').classList.remove('active');
+    
+    // Show/hide content
+    document.getElementById('cookie-pane').style.display = 'block';
+    document.getElementById('token-pane').style.display = 'none';
+    document.getElementById('cookie-pane').classList.add('active');
+    document.getElementById('token-pane').classList.remove('active');
+});
+
+document.getElementById('token-tab').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Update tab active states
+    document.getElementById('token-tab').classList.add('active');
+    document.getElementById('cookie-tab').classList.remove('active');
+    
+    // Show/hide content
+    document.getElementById('token-pane').style.display = 'block';
+    document.getElementById('cookie-pane').style.display = 'none';
+    document.getElementById('token-pane').classList.add('active');
+    document.getElementById('cookie-pane').classList.remove('active');
+});
+
+// Cookie Authentication API Call
+document.getElementById('cookieApiBtn').addEventListener('click', async function() {
     const btn = this;
-    const resultDiv = document.getElementById('apiResult');
-    const responseDiv = document.getElementById('apiResponse');
+    const resultDiv = document.getElementById('cookieApiResult');
+    const responseDiv = document.getElementById('cookieApiResponse');
     
     // Show loading state
     btn.disabled = true;
     btn.textContent = 'Calling API...';
     
     try {
-        const response = await fetch('{% url "demo_app:api_hello" %}', {
+        const response = await fetch('{% url "demo_app:api_cookie_hello" %}', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -79,13 +147,70 @@ document.getElementById('apiCallBtn').addEventListener('click', async function()
         responseDiv.textContent = JSON.stringify(data, null, 2);
         resultDiv.style.display = 'block';
         
-        btn.textContent = 'Call API Endpoint';
-        btn.disabled = false;
     } catch (error) {
         responseDiv.textContent = 'Error: ' + error.message;
         resultDiv.style.display = 'block';
+    } finally {
+        btn.textContent = 'Call Cookie API';
+        btn.disabled = false;
+    }
+});
+
+// Token Authentication API Call
+document.getElementById('tokenApiBtn').addEventListener('click', async function() {
+    const btn = this;
+    const resultDiv = document.getElementById('tokenApiResult');
+    const responseDiv = document.getElementById('tokenApiResponse');
+    
+    // Show loading state
+    btn.disabled = true;
+    btn.textContent = 'Calling API...';
+    
+    try {
+        // Get access token from template context
+        const accessToken = '{{ wristband.access_token|default:""|escapejs }}';
         
-        btn.textContent = 'Call API Endpoint';
+        if (!accessToken || accessToken === '' || accessToken === 'None') {
+            responseDiv.textContent = 'Error: No access token available. Please ensure you are logged in.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+        
+        const response = await fetch('{% url "demo_app:api_token_hello" %}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({ action: 'hello' })
+        });
+
+        // Check for 401 and redirect to login
+        if (response.status === 401) {
+            const loginUrl = new URL('{% url "demo_app:login" %}', window.location.origin);
+            loginUrl.searchParams.set('return_url', window.location.href);
+
+            const tenantDomain = '{{ wristband.tenant_domain_name|default:"" }}';
+            if (tenantDomain) {
+                loginUrl.searchParams.set('tenant_domain', tenantDomain);
+            }
+
+            window.location.href = loginUrl.toString();
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Show result
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.style.display = 'block';
+        
+    } catch (error) {
+        responseDiv.textContent = 'Error: ' + error.message;
+        resultDiv.style.display = 'block';
+    } finally {
+        btn.textContent = 'Call Token API';
         btn.disabled = false;
     }
 });
