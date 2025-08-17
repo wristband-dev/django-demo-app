@@ -11,16 +11,15 @@ from .wristband import wristband_auth
 logger = logging.getLogger(__name__)
 
 
-class AuthMiddleware(MiddlewareMixin):
-    API_PATH_PREFIX = "/api/"
-    PUBLIC_PATH_PREFIXES = ["/auth/", "/static/"]
-    PUBLIC_EXACT_PATHS = ["/", "/robots.txt"]
+class SessionCookieAuthMiddleware(MiddlewareMixin):
+    SKIP_PATH_PREFIXES = ["/auth/", "/static/"]
+    SKIP_PATHS = ["/", "/robots.txt", "/api/token-hello"]
 
     def process_request(self, request: HttpRequest) -> Optional[HttpResponse]:
         path = request.path
 
-        # Skip authentication for public paths
-        if any(path.startswith(prefix) for prefix in self.PUBLIC_PATH_PREFIXES) or path in self.PUBLIC_EXACT_PATHS:
+        # Skip authentication for public paths; adjust as needed for your paths
+        if any(path.startswith(prefix) for prefix in self.SKIP_PATH_PREFIXES) or path in self.SKIP_PATHS:
             logger.info(f"Skipping auth middleware for: {request.method} {path}")
             return None
 
@@ -64,7 +63,7 @@ class AuthMiddleware(MiddlewareMixin):
         request.session.flush()
 
         # Return 401 for API requests
-        if request.path.startswith(self.API_PATH_PREFIX):
+        if request.path.startswith("/api/"):
             return JsonResponse({"error": "Authentication failed"}, status=401)
 
         # Redirect to login for pages

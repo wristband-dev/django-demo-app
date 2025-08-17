@@ -7,6 +7,7 @@ See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 """
 
 import os
+import warnings
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -37,13 +38,13 @@ INSTALLED_APPS = [
 # __WRISTBAND__: The following middlewares work in unison to protect this app:
 # - SessionMiddleware: Django sessions will store authenticated user data.
 # - CsrfViewMiddleware: Enforces Cross-Site Request Forgery (CSRF) protection.
-# - AuthMiddleware: Defined in this app. Validates authenticated session and performs token refresh, if needed.
+# - SessionCookieAuthMiddleware: Defined in this app. Validates authenticated session and refreshes token, if needed.
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "demo_app.auth_middleware.AuthMiddleware",
+    "demo_app.session_cookie_auth_middleware.SessionCookieAuthMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -104,11 +105,19 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# Suppress the StreamingHttpResponse warning in development
+if DEBUG:
+    warnings.filterwarnings(
+        "ignore",
+        message="StreamingHttpResponse must consume synchronous iterators in order to serve them asynchronously",
+        category=Warning,
+        module="django.core.handlers.asgi",
+    )
+
 # __WRISTBAND__: Wristband Django Auth SDK Configurations.
 WRISTBAND_AUTH = {
     "client_id": os.environ.get("CLIENT_ID"),
     "client_secret": os.environ.get("CLIENT_SECRET"),
-    "dangerously_disable_secure_cookies": True,  # Set to False in Production!
     "login_state_secret": "0QHZoNJYZCzFpDIsI0zeSy4CHHctzMod22lNK6kk5mo=",  # Generate a different secret in Production!
     "login_url": "http://localhost:6001/auth/login/",
     "redirect_uri": "http://localhost:6001/auth/callback/",
@@ -118,7 +127,8 @@ WRISTBAND_AUTH = {
 # __WRISTBAND__: Django Session Configurations
 SESSION_SAVE_EVERY_REQUEST = True  # Keep a rolling session expiration time as long as user is active
 SESSION_COOKIE_AGE = 3600  # 1 hour of inactivity
-SESSION_COOKIE_SECURE = False  # Set to True in Production!
+SESSION_COOKIE_SECURE = True  # Set to True in Production!
 
 # __WRISTBAND__: CSRF Configurations
 CSRF_COOKIE_AGE = 3600  # 1 hour (same as session); auth middleware ensures session and csrf times stay in sync
+CSRF_COOKIE_SECURE = True # Set to True in Production!
