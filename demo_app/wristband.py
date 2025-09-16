@@ -17,9 +17,7 @@ wristband_auth: WristbandAuth = WristbandAuth(
         client_id=wristband_settings["client_id"],
         client_secret=wristband_settings["client_secret"],
         wristband_application_vanity_domain=wristband_settings["wristband_application_vanity_domain"],
-        login_url=wristband_settings["login_url"],
-        redirect_uri=wristband_settings["redirect_uri"],
-        login_state_secret=wristband_settings["login_state_secret"],
+        dangerously_disable_secure_cookies=wristband_settings["dangerously_disable_secure_cookies"],
     )
 )
 

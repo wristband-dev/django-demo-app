@@ -38,13 +38,13 @@ INSTALLED_APPS = [
 # __WRISTBAND__: The following middlewares work in unison to protect this app:
 # - SessionMiddleware: Django sessions will store authenticated user data.
 # - CsrfViewMiddleware: Enforces Cross-Site Request Forgery (CSRF) protection.
-# - SessionCookieAuthMiddleware: Defined in this app. Validates authenticated session and refreshes token, if needed.
+# - AuthMiddleware: Defined in this app. Validates authenticated session and refreshes token, if needed.
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "demo_app.session_cookie_auth_middleware.SessionCookieAuthMiddleware",
+    "demo_app.auth_middleware.AuthMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -118,17 +118,15 @@ if DEBUG:
 WRISTBAND_AUTH = {
     "client_id": os.environ.get("CLIENT_ID"),
     "client_secret": os.environ.get("CLIENT_SECRET"),
-    "login_state_secret": "0QHZoNJYZCzFpDIsI0zeSy4CHHctzMod22lNK6kk5mo=",  # Generate a different secret in Production!
-    "login_url": "http://localhost:6001/auth/login/",
-    "redirect_uri": "http://localhost:6001/auth/callback/",
     "wristband_application_vanity_domain": os.environ.get("APPLICATION_VANITY_DOMAIN"),
+    "dangerously_disable_secure_cookies": False,  # IMPORTANT: Set to True in Production!!
 }
 
 # __WRISTBAND__: Django Session Configurations
 SESSION_SAVE_EVERY_REQUEST = True  # Keep a rolling session expiration time as long as user is active
 SESSION_COOKIE_AGE = 3600  # 1 hour of inactivity
-SESSION_COOKIE_SECURE = True  # Set to True in Production!
+SESSION_COOKIE_SECURE = False  # IMPORTANT: Set to True in Production!!
 
 # __WRISTBAND__: CSRF Configurations
 CSRF_COOKIE_AGE = 3600  # 1 hour (same as session); auth middleware ensures session and csrf times stay in sync
-CSRF_COOKIE_SECURE = True # Set to True in Production!
+CSRF_COOKIE_SECURE = False  # IMPORTANT: Set to True in Production!!

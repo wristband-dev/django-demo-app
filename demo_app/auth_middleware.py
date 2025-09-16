@@ -5,27 +5,24 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
+from wristband.django_auth import is_wristband_auth_required
 
 from .wristband import wristband_auth
 
 logger = logging.getLogger(__name__)
 
 
-class SessionCookieAuthMiddleware(MiddlewareMixin):
-    SKIP_PATH_PREFIXES = ["/auth/", "/static/"]
-    SKIP_PATHS = ["/", "/robots.txt", "/api/token-hello"]
-
+class AuthMiddleware(MiddlewareMixin):
     def process_request(self, request: HttpRequest) -> Optional[HttpResponse]:
-        path = request.path
-
-        # Skip authentication for public paths; adjust as needed for your paths
-        if any(path.startswith(prefix) for prefix in self.SKIP_PATH_PREFIXES) or path in self.SKIP_PATHS:
-            logger.info(f"Skipping auth middleware for: {request.method} {path}")
+        # __WRISTBAND__: Skip authentication for public paths
+        if not is_wristband_auth_required(request):
+            logger.info(f"Skipping auth middleware for: {request.method} {request.path}")
             return None
 
         # __WRISTBAND__: Validate the user's authenticated session
         wristband_data = request.session.get("wristband")
         if not wristband_data:
+            logger.info(f"Auth middleware check FAILED for: {request.method} {request.path}")
             return self._auth_failure_response(request)
 
         try:
@@ -46,7 +43,7 @@ class SessionCookieAuthMiddleware(MiddlewareMixin):
                 )
                 request.session["wristband"] = wristband_data
 
-            # __WRISTBAND__: Need to call this here to update the CSRF cookie expiration time
+            # __WRISTBAND__: Always call this here to update the CSRF cookie expiration time
             get_token(request)
 
         except Exception as e:
@@ -62,7 +59,7 @@ class SessionCookieAuthMiddleware(MiddlewareMixin):
         # __WRISTBAND__: Clear session
         request.session.flush()
 
-        # Return 401 for API requests
+        # Return 401 for AJAX/API requests
         if request.path.startswith("/api/"):
             return JsonResponse({"error": "Authentication failed"}, status=401)
 

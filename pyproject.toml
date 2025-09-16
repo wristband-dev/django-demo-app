@@ -20,7 +20,7 @@ dependencies = [
     "uvicorn[standard]>=0.24.0",
     "gunicorn>=21.0.0",
     # __WRISTBAND__
-    "wristband-django-auth>=0.1.1",
+    "wristband-django-auth>=0.3.0",
     "wristband-python-jwt>=0.1.0",
 ]
 keywords = [
