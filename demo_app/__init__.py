@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 # 🚨 TOGGLE THIS FLAG FOR LOCAL DEVELOPMENT ONLY 🚨
 # Set to False before any production deployment or public demo
-_DISABLE_SSL_FOR_WRISTBAND_DEV = True  # ⚠️ CHANGE TO False FOR PRODUCTION ⚠️
+_DISABLE_SSL_FOR_WRISTBAND_DEV = False  # ⚠️ CHANGE TO False FOR PRODUCTION ⚠️
 
 if _DISABLE_SSL_FOR_WRISTBAND_DEV:
     logger.warning("🚨 WARNING: SSL verification is DISABLED for ALL httpx requests!")
