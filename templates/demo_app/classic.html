@@ -4,29 +4,30 @@
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <div class="text-center mb-4">
-            <h1 class="display-5">👋 Hello World!</h1>
-        </div>
-
-        <div class="alert alert-success">
-            <strong>🔒 Protected Page:</strong> 
-            You can only see this page because you're authenticated through Wristband!
+            <h1 class="display-5">🌐 Classic Django Views</h1>
+            <p class="text-muted small mb-0">🔒 Page Protected by <code style="color: #e61eac;">SessionRequiredMixin</code> class</p>
         </div>
 
         <div class="card mt-4">
             <div class="card-body">
-                <h5 class="card-title">⚡ Test API Endpoints</h5>
-                <p class="card-text">Compare different authentication methods for API calls.</p>
+                <h5 class="card-title">⚡ Function-Based View APIs</h5>
+                <p class="card-text">
+                    Classic Django function-based views protected with Wristband authentication decorators.
+                    These endpoints demonstrate how to secure traditional Django APIs (not using DRF) with two authentication strategies:
+                    <strong>session cookies with CSRF protection</strong> for browser-based clients, and <strong>JWT bearer tokens</strong>
+                    for stateless API access. Both strategies use Wristband's auth decorators to enforce authentication before executing the view logic.
+                </p>
                 
                 <!-- Tab Navigation -->
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link active" href="#" id="cookie-tab" role="tab">
-                            🍪 Test with Cookie
+                            🍪 Session + CSRF
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="token-tab" role="tab">
-                            🔑 Test with Token
+                            🔑 JWT Bearer Token
                         </a>
                     </li>
                 </ul>
@@ -38,8 +39,15 @@
                         <div class="p-3">
                             <h6>Session Cookie + CSRF Authentication</h6>
                             <p class="text-muted mb-3">
-                                <small>API authentication using session cookies and CSRF protection.</small>
+                                Uses the <code>@require_session</code> decorator to validate the session cookie. 
+                                Requires CSRF token in the <code>X-CSRFToken</code> header for protection against cross-site request forgery attacks. 
+                                Ideal for <strong>AJAX calls from your frontend</strong> to Django backend.
                             </p>
+                            <div class="mb-3">
+                                <strong>Decorator:</strong> <code>@require_session</code><br>
+                                <strong>Endpoint:</strong> <code>POST /api/classic/session-hello</code><br>
+                                <strong>Headers:</strong> Session cookie + CSRF token
+                            </div>
                             <button id="cookieApiBtn" class="btn btn-primary">Call Cookie API</button>
                             <div id="cookieApiResult" class="mt-3" style="display: none;">
                                 <div class="alert alert-info">
@@ -54,8 +62,19 @@
                         <div class="p-3">
                             <h6>JWT Bearer Token Authentication</h6>
                             <p class="text-muted mb-3">
-                                <small>API authentication using JWT bearer tokens.</small>
+                                Uses the <code>@require_jwt</code> decorator to validate Wristband JWT tokens 
+                                from the <code>Authorization: Bearer</code> header. No session or CSRF needed - completely stateless. 
+                                Ideal for <strong>mobile apps or external API clients</strong>.
                             </p>
+                            <div class="alert alert-warning small mb-3" role="alert">
+                                <strong>⚠️ Demo Only:</strong> This example embeds the access token in the template. In production, 
+                                fetch tokens from a secure endpoint or store them safely in your app.
+                            </div>
+                            <div class="mb-3">
+                                <strong>Decorator:</strong> <code>@require_jwt</code><br>
+                                <strong>Endpoint:</strong> <code>POST /api/classic/jwt-hello</code><br>
+                                <strong>Header:</strong> <code>Authorization: Bearer &lt;token&gt;</code>
+                            </div>
                             <button id="tokenApiBtn" class="btn btn-success">Call Token API</button>
                             <div id="tokenApiResult" class="mt-3" style="display: none;">
                                 <div class="alert alert-info">
@@ -104,7 +123,7 @@ document.getElementById('token-tab').addEventListener('click', function(e) {
     document.getElementById('cookie-pane').classList.remove('active');
 });
 
-// Cookie Authentication API Call
+// Session Authentication API Call
 document.getElementById('cookieApiBtn').addEventListener('click', async function() {
     const btn = this;
     const resultDiv = document.getElementById('cookieApiResult');
@@ -115,7 +134,7 @@ document.getElementById('cookieApiBtn').addEventListener('click', async function
     btn.textContent = 'Calling API...';
     
     try {
-        const response = await fetch('{% url "demo_app:api_cookie_hello" %}', {
+        const response = await fetch('{% url "demo_app:classic_session_hello" %}', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -131,10 +150,10 @@ document.getElementById('cookieApiBtn').addEventListener('click', async function
             const loginUrl = new URL('{% url "demo_app:login" %}', window.location.origin);
             loginUrl.searchParams.set('return_url', window.location.href);
 
-            // __WRISTBAND__: Use the current session's tenant domain if available at time of redirect.
-            const tenantDomain = '{{ wristband.tenant_domain_name|default:"" }}';
-            if (tenantDomain) {
-                loginUrl.searchParams.set('tenant_domain', tenantDomain);
+            // __WRISTBAND__: Use the current session's tenant name if available at time of redirect.
+            const tenantName = '{{ tenant_name|default:"" }}';
+            if (tenantName) {
+                loginUrl.searchParams.set('tenant_name', tenantName);
             }
 
             window.location.href = loginUrl.toString();
@@ -156,7 +175,7 @@ document.getElementById('cookieApiBtn').addEventListener('click', async function
     }
 });
 
-// Token Authentication API Call
+// JWT Authentication API Call
 document.getElementById('tokenApiBtn').addEventListener('click', async function() {
     const btn = this;
     const resultDiv = document.getElementById('tokenApiResult');
@@ -168,15 +187,17 @@ document.getElementById('tokenApiBtn').addEventListener('click', async function(
     
     try {
         // Get access token from template context
-        const accessToken = '{{ wristband.access_token|default:""|escapejs }}';
+        // ⚠️ DEMO ONLY: In production, don't embed tokens in HTML!
+        // Better: fetch from an implemented Token Endpoint or use sessionStorage
+        const accessToken = '{{ access_token|default:""|escapejs }}';
         
-        if (!accessToken || accessToken === '' || accessToken === 'None') {
+        if (!accessToken || accessToken === 'None') {
             responseDiv.textContent = 'Error: No access token available. Please ensure you are logged in.';
             resultDiv.style.display = 'block';
             return;
         }
         
-        const response = await fetch('{% url "demo_app:api_token_hello" %}', {
+        const response = await fetch('{% url "demo_app:classic_jwt_hello" %}', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -191,9 +212,9 @@ document.getElementById('tokenApiBtn').addEventListener('click', async function(
             const loginUrl = new URL('{% url "demo_app:login" %}', window.location.origin);
             loginUrl.searchParams.set('return_url', window.location.href);
 
-            const tenantDomain = '{{ wristband.tenant_domain_name|default:"" }}';
-            if (tenantDomain) {
-                loginUrl.searchParams.set('tenant_domain', tenantDomain);
+            const tenantName = '{{ tenant_name|default:"" }}';
+            if (tenantName) {
+                loginUrl.searchParams.set('tenant_name', tenantName);
             }
 
             window.location.href = loginUrl.toString();

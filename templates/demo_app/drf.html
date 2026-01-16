@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+.auth-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.step-badge {
+    background: #e61eac;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+</style>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-4">
+            <h1 class="display-5">🔌 Django REST Framework (DRF)</h1>
+            <p class="text-muted small mb-0">🔒 Page Protected by <code style="color: #e61eac;">SessionRequiredMixin</code> class</p>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">⚡ REST API Authentication with DRF</h5>
+                <p class="card-text">
+                    When building <strong>single-page applications (SPAs) or mobile apps</strong> that need to communicate with your Django backend via REST APIs,
+                    Django REST Framework (DRF) provides powerful authentication classes. This demo shows two authentication strategies for protecting API endpoints:
+                    <strong>session-based authentication</strong> (stateful, cookie-based) and <strong>JWT bearer token authentication</strong> (stateless, token-based).
+                    Both strategies work with SPAs, mobile apps, and microservices. Choose based on your security requirements and client capabilities.
+                </p>
+                
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="session-endpoint-tab" role="tab">
+                            🍪 Session Endpoint
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="jwt-flow-tab" role="tab">
+                            🔑 JWT Authentication
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content mt-3">
+                    <!-- Session Endpoint Tab -->
+                    <div class="tab-pane active" id="session-endpoint-pane">
+                        <div class="p-3">
+                            <h6>Session Endpoint (Session Authentication)</h6>
+                            <p class="auth-description mb-3">
+                                This endpoint uses <strong>session-based authentication</strong> with Wristband's <code>DrfSessionAuth</code> class. 
+                                The session cookie is automatically sent by your browser, and DRF validates it before returning your session data. 
+                                This is ideal for <strong>single-page applications (SPAs)</strong> that need to retrieve user and tenant information.
+                                <strong>This endpoint matches the format expected by Wristband's frontend SDKs</strong> (React, Angular, Vue, etc.).
+                            </p>
+                            <div class="mb-3">
+                                <strong>Authentication:</strong> <code>DrfSessionAuth</code><br>
+                                <strong>Endpoint:</strong> <code>GET /api/drf/session</code><br>
+                                <strong>Returns:</strong> tenantId, userId, metadata (email, etc.)
+                            </div>
+                            <button id="sessionEndpointBtn" class="btn btn-primary">Get Session Data</button>
+                            <div id="sessionEndpointResult" class="mt-3" style="display: none;">
+                                <div class="alert alert-info">
+                                    <pre id="sessionEndpointResponse"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- JWT Flow Tab -->
+                    <div class="tab-pane" id="jwt-flow-pane" style="display: none;">
+                        <div class="p-3">
+                            <h6>JWT Authentication Flow</h6>
+                            <p class="auth-description mb-3">
+                                This demonstrates <strong>stateless JWT bearer token authentication</strong>. First, you retrieve an access token 
+                                from the Token Endpoint (using session auth). Then, you use that token in the <code>Authorization: Bearer</code> header 
+                                to call a protected API endpoint. This is ideal for <strong>mobile apps or microservices</strong> that need stateless authentication.
+                            </p>
+                            
+                            <!-- Step 1: Get Token -->
+                            <div class="mb-4">
+                                <h6><span class="step-badge">STEP 1</span> Get Access Token</h6>
+                                <p class="auth-description mb-2">
+                                    Call the Token Endpoint to retrieve your Wristband access token. This endpoint uses session authentication 
+                                    to verify your identity, then returns a JWT that can be used for subsequent API calls.
+                                    <strong>This endpoint matches the format expected by Wristband's frontend SDKs</strong> (React, Angular, Vue, etc.).
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Authentication:</strong> <code>DrfSessionAuth</code><br>
+                                    <strong>Endpoint:</strong> <code>GET /api/drf/token</code><br>
+                                    <strong>Returns:</strong> accessToken, expiresAt
+                                </div>
+                                <button id="getTokenBtn" class="btn btn-primary">Get Access Token</button>
+                                <div id="tokenResult" class="mt-3" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <strong>✓ Token Retrieved</strong>
+                                        <pre id="tokenResponse"></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Use JWT -->
+                            <div class="mb-3">
+                                <h6><span class="step-badge">STEP 2</span> Call API with JWT</h6>
+                                <p class="auth-description mb-2">
+                                    Use the access token from Step 1 in the <code>Authorization: Bearer</code> header to call a protected endpoint. 
+                                    DRF validates the JWT using Wristband's <code>DrfJwtAuth</code> class. This demonstrates <strong>stateless authentication</strong> 
+                                    - no session cookies needed!
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Authentication:</strong> <code>DrfJwtAuth</code><br>
+                                    <strong>Endpoint:</strong> <code>POST /api/drf/jwt-hello</code><br>
+                                    <strong>Header:</strong> <code>Authorization: Bearer &lt;token&gt;</code>
+                                </div>
+                                <button id="callJwtApiBtn" class="btn btn-success" disabled>Call JWT API</button>
+                                <div id="jwtApiResult" class="mt-3" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <pre id="jwtApiResponse"></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'demo_app:home' %}" class="btn btn-secondary me-2">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<script>
+let accessToken = null;
+
+// Tab switching functionality
+document.getElementById('session-endpoint-tab').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('session-endpoint-tab').classList.add('active');
+    document.getElementById('jwt-flow-tab').classList.remove('active');
+    document.getElementById('session-endpoint-pane').style.display = 'block';
+    document.getElementById('jwt-flow-pane').style.display = 'none';
+    document.getElementById('session-endpoint-pane').classList.add('active');
+    document.getElementById('jwt-flow-pane').classList.remove('active');
+});
+
+document.getElementById('jwt-flow-tab').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('jwt-flow-tab').classList.add('active');
+    document.getElementById('session-endpoint-tab').classList.remove('active');
+    document.getElementById('jwt-flow-pane').style.display = 'block';
+    document.getElementById('session-endpoint-pane').style.display = 'none';
+    document.getElementById('jwt-flow-pane').classList.add('active');
+    document.getElementById('session-endpoint-pane').classList.remove('active');
+});
+
+// Session Endpoint API Call
+document.getElementById('sessionEndpointBtn').addEventListener('click', async function() {
+    const btn = this;
+    const resultDiv = document.getElementById('sessionEndpointResult');
+    const responseDiv = document.getElementById('sessionEndpointResponse');
+    
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    
+    try {
+        const response = await fetch('{% url "demo_app:drf_session" %}', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            const loginUrl = new URL('{% url "demo_app:login" %}', window.location.origin);
+            loginUrl.searchParams.set('return_url', window.location.href);
+            window.location.href = loginUrl.toString();
+            return;
+        }
+        
+        const data = await response.json();
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.style.display = 'block';
+        
+    } catch (error) {
+        responseDiv.textContent = 'Error: ' + error.message;
+        resultDiv.style.display = 'block';
+    } finally {
+        btn.textContent = 'Get Session Data';
+        btn.disabled = false;
+    }
+});
+
+// Step 1: Get Access Token
+document.getElementById('getTokenBtn').addEventListener('click', async function() {
+    const btn = this;
+    const resultDiv = document.getElementById('tokenResult');
+    const responseDiv = document.getElementById('tokenResponse');
+    const callJwtBtn = document.getElementById('callJwtApiBtn');
+    
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    
+    try {
+        const response = await fetch('{% url "demo_app:drf_token" %}', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            const loginUrl = new URL('{% url "demo_app:login" %}', window.location.origin);
+            loginUrl.searchParams.set('return_url', window.location.href);
+            window.location.href = loginUrl.toString();
+            return;
+        }
+        
+        const data = await response.json();
+        accessToken = data.accessToken; // Store token
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.style.display = 'block';
+        
+        // Enable Step 2
+        callJwtBtn.disabled = false;
+        
+    } catch (error) {
+        responseDiv.textContent = 'Error: ' + error.message;
+        resultDiv.style.display = 'block';
+    } finally {
+        btn.textContent = 'Get Access Token';
+        btn.disabled = false;
+    }
+});
+
+// Step 2: Call JWT API
+document.getElementById('callJwtApiBtn').addEventListener('click', async function() {
+    const btn = this;
+    const resultDiv = document.getElementById('jwtApiResult');
+    const responseDiv = document.getElementById('jwtApiResponse');
+    
+    if (!accessToken) {
+        responseDiv.textContent = 'Error: Please get an access token first (Step 1)';
+        resultDiv.style.display = 'block';
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Calling API...';
+    
+    try {
+        const response = await fetch('{% url "demo_app:drf_jwt_hello" %}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({ action: 'hello' })
+        });
+
+        if (response.status === 401) {
+            responseDiv.textContent = 'Error: Token expired or invalid. Please get a new token (Step 1).';
+            resultDiv.style.display = 'block';
+            btn.disabled = false;
+            return;
+        }
+        
+        const data = await response.json();
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+        resultDiv.style.display = 'block';
+        
+    } catch (error) {
+        responseDiv.textContent = 'Error: ' + error.message;
+        resultDiv.style.display = 'block';
+    } finally {
+        btn.textContent = 'Call JWT API';
+        btn.disabled = false;
+    }
+});
+
+// Helper function to get CSRF token (not needed for GET requests, but keeping for consistency)
+function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [key, value] = cookie.trim().split('=');
+        if (key === name) return value;
+    }
+    return '';
+}
+</script>
+{% endblock %}

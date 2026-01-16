@@ -34,6 +34,36 @@
             font-family: 'Courier New', monospace;
             margin: 1rem 0;
         }
+        /* Brighter nav links */
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            display: inline-block;
+        }
+        /* More space between nav items in desktop */
+        @media (min-width: 992px) {
+            .navbar-nav .nav-item {
+                margin-right: 1rem;
+            }
+        }
+        /* Space before user info in mobile */
+        @media (max-width: 991px) {
+            .navbar-nav:last-child {
+                margin-top: 1rem;
+            }
+            .navbar-nav:last-child .nav-item {
+                margin-bottom: 0.5rem;
+            }
+        }
+        /* Pink hover */
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: #e61eac;
+        }
+        /* Active page - pink underline */
+        .navbar-dark .navbar-nav .nav-link.active {
+            color: #e61eac;
+            border-bottom: 2px solid #e61eac;
+            padding-bottom: calc(0.5rem - 2px);
+        }
     </style>
 </head>
 <body>
@@ -49,24 +79,27 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'demo_app:home' %}">Home</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'demo_app:home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'demo_app:hello_world' %}">Hello World</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'classic' %}active{% endif %}" href="{% url 'demo_app:classic' %}">Classic</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'demo_app:profile' %}">Profile</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'drf' %}active{% endif %}" href="{% url 'demo_app:drf' %}">DRF</a>
                     </li>
                 </ul>
                 
                 <ul class="navbar-nav">
-                    <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
-                    {% if wristband %}
+                    <!-- __WRISTBAND__: Check if user is logged in -->
+                    {% if is_authenticated %}
                         <li class="nav-item d-flex align-items-center">
-                            <span class="navbar-text me-3">Welcome, {{ wristband.user_info.given_name|default:wristband.user_info.email }}!</span>
+                            <span class="navbar-text me-3">{{ given_name|default:email }}</span>
                         </li>
-                        <li class="nav-item">
-                            <a href="/auth/logout/" class="btn btn-outline-light">Logout</a>
+                        <li class="nav-item w-lg-auto w-100">
+                            <a href="/admin/" class="btn btn-outline-light me-2 text-nowrap w-lg-auto w-100">⚙️ Admin</a>
+                        </li>
+                        <li class="nav-item w-lg-auto w-100">
+                            <a href="/auth/logout/" class="btn btn-outline-light text-nowrap w-lg-auto w-100">Logout</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
