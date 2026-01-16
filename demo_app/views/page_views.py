@@ -1,32 +1,33 @@
 """
-Views for the demo app
+Page Views for the demo app
 """
 
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
-from django.views import View
-from wristband.django_auth import WristbandAuthRequiredMixin
+from django.views.generic import TemplateView
+
+from demo_app.wristband import SessionRequiredMixin
 
 
-class Home(View):
+class HomePage(TemplateView):
     """
-    Home page view
+    Home page
     """
-    def get(self, request: HttpRequest) -> HttpResponse:
-        return render(request, "demo_app/home.html")
+
+    template_name = "demo_app/home.html"
 
 
-class HelloWorld(WristbandAuthRequiredMixin, View):  # __WRISTBAND__: Protected View
+# __WRISTBAND__: Protected View
+class ClassicPage(SessionRequiredMixin, TemplateView):  # type: ignore
     """
-    Hello World view (requires auth)
+    Hello World with Classic Django Views
     """
-    def get(self, request: HttpRequest) -> HttpResponse:
-        return render(request, "demo_app/hello_world.html")
+
+    template_name = "demo_app/classic.html"
 
 
-class Profile(WristbandAuthRequiredMixin, View):  # __WRISTBAND__: Protected View
+# __WRISTBAND__: Protected View
+class DrfPage(SessionRequiredMixin, TemplateView):  # type: ignore
     """
-    User profile view (requires auth)
+    Hello World with Django REST Framework APIs
     """
-    def get(self, request: HttpRequest) -> HttpResponse:
-        return render(request, "demo_app/profile.html")
+
+    template_name = "demo_app/drf.html"

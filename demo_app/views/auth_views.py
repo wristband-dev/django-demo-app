@@ -1,23 +1,20 @@
-import logging
-
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpRequest, HttpResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.http import require_GET
-from wristband.django_auth import CallbackData, CallbackResultType, LogoutConfig
+from wristband.django_auth import LogoutConfig, RedirectRequiredCallbackResult, session_from_callback
 
 from ..wristband import wristband_auth
 
-logger = logging.getLogger(__name__)
-
 
 @require_GET
-def login_view(request: HttpRequest) -> HttpResponse:
-    """ Construct the authorize request URL and redirect to the Wristband Authorize Endpoint. """
+def login_endpoint(request: HttpRequest) -> HttpResponse:
+    """Construct the authorize request URL and redirect to the Wristband Authorize Endpoint."""
     return wristband_auth.login(request)  # __WRISTBAND__
 
 
 @require_GET
-def callback_view(request: HttpRequest) -> HttpResponse:
+def callback_endpoint(request: HttpRequest) -> HttpResponse:
     """
     Wristband SDK will fetch token and user data after the user authenticates, store them
     into a new session, and then this view will redirect into the application.
@@ -25,20 +22,20 @@ def callback_view(request: HttpRequest) -> HttpResponse:
     callback_result = wristband_auth.callback(request)  # __WRISTBAND__
 
     # Some edges require an immediate redirect to restart the login flow
-    if callback_result.type == CallbackResultType.REDIRECT_REQUIRED:
-        redirect_url: str = callback_result.redirect_url  # type: ignore[assignment]
-        return wristband_auth.create_callback_response(request, redirect_url)
+    if isinstance(callback_result, RedirectRequiredCallbackResult):
+        return wristband_auth.create_callback_response(request, callback_result.redirect_url)
 
     # Store session data for authenticated user
-    callback_data: CallbackData = callback_result.callback_data  # type: ignore[assignment]
-    request.session["wristband"] = {
-        "user_info": callback_data.user_info,
-        "access_token": callback_data.access_token,
-        "refresh_token": callback_data.refresh_token,
-        "expires_at": callback_data.expires_at,
-        "tenant_domain_name": callback_data.tenant_domain_name,
-        "tenant_custom_domain": callback_data.tenant_custom_domain,
-    }
+    callback_data = callback_result.callback_data
+    session_from_callback(
+        request=request,
+        callback_data=callback_data,
+        custom_fields={"email": callback_data.user_info.email, "given_name": callback_data.user_info.given_name},
+    )
+
+    # Django's auth system: WristbandAuthBackend handles user syncing with custom adapter
+    user = authenticate(request, callback_data=callback_data)
+    login(request, user)
 
     # This creates the csrftoken cookie and stores the token in the session.
     get_token(request)
@@ -49,22 +46,17 @@ def callback_view(request: HttpRequest) -> HttpResponse:
 
 
 @require_GET
-def logout_view(request: HttpRequest) -> HttpResponse:
-    """ Log out the user and redirect to the Wristband Logout Endpoint. """
-    # Get session data
-    wristband_session = request.session.get("wristband", {})
-    refresh_token = wristband_session.get("refresh_token")
-    tenant_domain_name = wristband_session.get("tenant_domain_name")
-    tenant_custom_domain = wristband_session.get("tenant_custom_domain")
-
+def logout_endpoint(request: HttpRequest) -> HttpResponse:
+    """Log out the user and redirect to the Wristband Logout Endpoint."""
     # Wristband SDK revokes the refresh token and creates the proper redirect response
     logout_config = LogoutConfig(
-        refresh_token=refresh_token,  # Pass in the refresh token you want to revoke
-        tenant_domain_name=tenant_domain_name,  # Wristband Logout requires a tenant level domain
-        tenant_custom_domain=tenant_custom_domain,  # Custom domains take precedence, if present
-        redirect_url="http://localhost:6001",  # Redirect to home page
+        refresh_token=request.session.get("refresh_token"),  # The refresh token you want to revoke
+        tenant_name=request.session.get("tenant_name"),  # Wristband Logout requires a tenant level domain
+        tenant_custom_domain=request.session.get("tenant_custom_domain"),  # Custom domains takes precedence, if present
     )
     response = wristband_auth.logout(request, logout_config)  # __WRISTBAND__
+
+    logout(request)  # Log user out of Django's auth system
 
     # Clear the session as well as CSRF cookie
     request.session.flush()

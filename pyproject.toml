@@ -11,7 +11,7 @@ license = "MIT"
 authors = [
     {name = "Wristband", email = "support@wristband.dev"},
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "cryptography>=44.0.3",
     "Django>=4.2",
@@ -19,9 +19,9 @@ dependencies = [
     "httpx>=0.24.0",
     "uvicorn[standard]>=0.24.0",
     "gunicorn>=21.0.0",
+    "whitenoise>=6.6.0",
     # __WRISTBAND__
-    "wristband-django-auth>=0.3.0",
-    "wristband-python-jwt>=0.1.0",
+    "wristband-django-auth[drf]>=1.0.1",
 ]
 keywords = [
     "django",
@@ -50,6 +50,7 @@ dev = [
     "setuptools>=61",
     "mypy>=1.10.0",
     "types-jsonschema",
+    "djangorestframework-stubs>=3.15.0",
     "django-stubs",
     "flake8>=6.0.0,<7.0.0",
     "flake8-pyproject>=1.2.0",

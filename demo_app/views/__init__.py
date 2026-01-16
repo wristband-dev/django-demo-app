@@ -1,15 +1,19 @@
-from .api_views import cookie_hello_world_api, token_hello_world_api
-from .auth_views import callback_view, login_view, logout_view
-from .page_views import HelloWorld, Home, Profile
+from .auth_views import callback_endpoint, login_endpoint, logout_endpoint
+from .classic_api_views import classic_jwt_hello_world_api, classic_session_hello_world_api
+from .drf_api_views import DrfJwtHelloApi, SessionEndpoint, TokenEndpoint
+from .page_views import ClassicPage, DrfPage, HomePage
 
 # Explicit exports
 __all__ = [
-  "callback_view",
-  "cookie_hello_world_api",
-  "HelloWorld",
-  "Home",
-  "login_view",
-  "logout_view",
-  "Profile",
-  "token_hello_world_api",
+    "callback_endpoint",
+    "classic_session_hello_world_api",
+    "classic_jwt_hello_world_api",
+    "ClassicPage",
+    "DrfPage",
+    "DrfJwtHelloApi",
+    "HomePage",
+    "login_endpoint",
+    "logout_endpoint",
+    "SessionEndpoint",
+    "TokenEndpoint",
 ]

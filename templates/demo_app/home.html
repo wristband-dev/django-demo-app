@@ -1,66 +1,84 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+.card-link .card {
+    height: 100%;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+.card-link:hover .card {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-color: #0d6efd;
+}
+.card-link:hover {
+    color: inherit;
+}
+</style>
+
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <div class="text-center mb-4">
             <h1 class="display-5">Welcome to Django Demo</h1>
         </div>
         <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
-        {% if wristband %}
+        {% if is_authenticated %}
             <div class="alert alert-success" role="alert">
-                <h4 class="alert-heading">🎉 You're authenticated!</h4>
-                <p>Welcome <strong>{{ wristband.user_info.email }}</strong>! You're logged into tenant <strong>{{ wristband.tenant_domain_name }}</strong>.</p>
-                <hr>
-                <p class="mb-0">Explore the protected pages below - your session will stay active as long as you're using the app.</p>
+                🎉 Welcome, you're logged into tenant <strong>"{{ tenant_name }}"</strong>!
+            </div>
+            <div class="alert alert-info border" role="alert">
+                <strong>💡 Tip:</strong> This demo showcases multiple auth patterns. Pick the ones that match your Django setup. You don't need to use them all!
             </div>
         {% else %}
             <div class="alert alert-info" role="alert">
-                <h4 class="alert-heading">🔐 Authentication Ready</h4>
-                <p>This demo shows Wristband auth integration with Django. Click "Login with Wristband" to see the full auth flow!</p>
+                <h5 class="m-0">🔐 Please login to try this auth demo.</h5>
             </div>
         {% endif %}
 
         <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">👋 Hello World</h5>
-                        <p class="card-text">Test out an AJAX API request.</p>
-                        <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
-                        {% if wristband %}
-                            <a href="{% url 'demo_app:hello_world' %}" class="btn btn-primary">Say Hello</a>
-                        {% else %}
-                            <a href="/auth/login/" class="btn btn-outline-primary">Login to Access</a>
-                        {% endif %}
+            <div class="col-md-6 mb-2 d-flex flex-column">
+                <a href="{% url 'demo_app:classic' %}" class="card-link">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🌐 Classic Django Views</h5>
+                            <p class="card-text">Demonstrates function decorators for API endpoint protection.</p>
+                            <p class="text-muted small mb-0">🔒 Page Protected by <code style="color: #e61eac;">SessionRequiredMixin</code> class</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">👤 Profile</h5>
-                        <p class="card-text">View your user profile and token info.</p>
-                        <!-- __WRISTBAND__: Check if user is logged in via Wristband -->
-                        {% if wristband %}
-                            <a href="{% url 'demo_app:profile' %}" class="btn btn-primary">View Profile</a>
-                        {% else %}
-                            <a href="/auth/login/" class="btn btn-outline-primary">Login to Access</a>
-                        {% endif %}
+            <div class="col-md-6 mb-2 d-flex flex-column">
+                <a href="{% url 'demo_app:drf' %}" class="card-link">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">🔌 Django REST Framework (DRF)</h5>
+                            <p class="card-text">Demonstrates DRF authentication classes for API endpoint protection.</p>
+                            <p class="text-muted small mb-0">🔒 Page Protected by <code style="color: #e61eac;">SessionRequiredMixin</code> class</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
         <div class="feature-list mt-4">
             <h3>🎯 What This App Demonstrates</h3>
             <ul>
-                <li>✅ <strong>Auth middleware</strong> protecting the view</li>
-                <li>✅ <strong>User/tenant information</strong> from Wristband in template context</li>
-                <li>✅ <strong>Access token</strong> available for API calls</li>
-                <li>✅ <strong>Automatic redirect</strong> to login if not authenticated</li>
-                <li>✅ <strong>Rolling sessions</strong> - stay logged in while active</li>
-                <li>✅ <strong>Token refresh</strong> - middleware handles expired tokens</li>
-                <li>✅ <strong>CSRF protection</strong> - secure forms and AJAX requestsToken refresh</li>
+                <li>✅ Session-based auth with rolling sessions & token refresh</li>
+                <li>✅ JWT bearer token authentication for APIs</li>
+                <li>✅ Function decorators and CBV mixins for Django views</li>
+                <li>✅ DRF authentication classes for REST API endpoints</li>
+                <li>✅ Template context processor for Wristband user and tenant data</li>
+                <li>✅ Authentication backend for syncing to Django User model</li>
+                <li>✅ CSRF protection for forms and AJAX</li>
+                <li>✅ Override Django's admin auth to use Wristband instead of username/password</li>
             </ul>
         </div>
     </div>

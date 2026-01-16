@@ -9,15 +9,19 @@ from . import views
 app_name = "demo_app"
 
 urlpatterns = [
-    # Pages
-    path("", views.Home.as_view(), name="home"),
-    path("hello-world/", views.HelloWorld.as_view(), name="hello_world"),
-    path("profile/", views.Profile.as_view(), name="profile"),
-    # API Endpoints
-    path("api/cookie-hello/", views.cookie_hello_world_api, name="api_cookie_hello"),
-    path("api/token-hello/", views.token_hello_world_api, name="api_token_hello"),
     # __WRISTBAND__: Auth Endpoints
-    path("auth/login/", views.login_view, name='login'),
-    path("auth/callback/", views.callback_view, name='callback'),
-    path("auth/logout/", views.logout_view, name='logout'),
+    path("auth/login/", views.login_endpoint, name="login"),
+    path("auth/callback/", views.callback_endpoint, name="callback"),
+    path("auth/logout/", views.logout_endpoint, name="logout"),
+    # Page Views
+    path("", views.HomePage.as_view(), name="home"),
+    path("classic/", views.ClassicPage.as_view(), name="classic"),
+    path("django-rest-framework/", views.DrfPage.as_view(), name="drf"),
+    # Classic Django API Views
+    path("api/classic/session-hello/", views.classic_session_hello_world_api, name="classic_session_hello"),
+    path("api/classic/jwt-hello/", views.classic_jwt_hello_world_api, name="classic_jwt_hello"),
+    # Django REST Framework (DRF) APIs
+    path("api/drf/session/", views.SessionEndpoint.as_view(), name="drf_session"),
+    path("api/drf/token/", views.TokenEndpoint.as_view(), name="drf_token"),
+    path("api/drf/jwt-hello/", views.DrfJwtHelloApi.as_view(), name="drf_jwt_hello"),
 ]
