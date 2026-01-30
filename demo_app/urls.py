@@ -10,9 +10,9 @@ app_name = "demo_app"
 
 urlpatterns = [
     # __WRISTBAND__: Auth Endpoints
-    path("auth/login/", views.login_endpoint, name="login"),
-    path("auth/callback/", views.callback_endpoint, name="callback"),
-    path("auth/logout/", views.logout_endpoint, name="logout"),
+    path("api/auth/login/", views.login_endpoint, name="login"),
+    path("api/auth/callback/", views.callback_endpoint, name="callback"),
+    path("api/auth/logout/", views.logout_endpoint, name="logout"),
     # Page Views
     path("", views.HomePage.as_view(), name="home"),
     path("classic/", views.ClassicPage.as_view(), name="classic"),
