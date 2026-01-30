@@ -17,13 +17,13 @@ def robots_txt(request: HttpRequest) -> HttpResponse:
 def admin_login_redirect(request: HttpRequest) -> HttpResponse:
     """Redirect admin login to Wristband"""
     return_url = request.build_absolute_uri("/admin/")
-    return redirect(f"/auth/login/?return_url={return_url}")
+    return redirect(f"/api/auth/login/?return_url={return_url}")
 
 
 def admin_logout_redirect(request: HttpRequest) -> HttpResponse:
     """Redirect admin logout to Wristband"""
     return_url = request.build_absolute_uri("/admin/")
-    return redirect(f"/auth/logout/?return_url={return_url}")
+    return redirect(f"/api/auth/logout/?return_url={return_url}")
 
 
 urlpatterns = [
