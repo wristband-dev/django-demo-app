@@ -45,7 +45,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-demo-key-change-in-production"  # nosec B105
+SECRET_KEY = "django-insecure-demo-key-change-in-production"  # nosec B105 - Demo only, not for production
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -68,7 +68,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # __WRISTBAND__: Custom adapter for role mapping when using the Wristband auth backend (optional)
-WRISTBAND_ADAPTER = "demo_app.adapters.MyWristbandAdapter"
+WRISTBAND_AUTH_BACKEND_ADAPTER = "demo_app.adapters.MyWristbandAdapter"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -177,7 +177,7 @@ SESSION_COOKIE_SECURE = False  # IMPORTANT: Set to True in Production!!
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
 SESSION_COOKIE_SAMESITE = "Lax"  # Reasonably secure default option
 # IMPORTANT: In production, use a strong, randomly-generated secret (32+ characters)!!
-WRISTBAND_SESSION_SECRET = "dummy_67f44f4964e6c998dee827110c"
+WRISTBAND_SESSION_SECRET = "dummy_67f44f4964e6c998dee827110c"  # nosec B105 - Demo only, not for production
 
 # __WRISTBAND__: CSRF Configurations (Optional)
 CSRF_COOKIE_AGE = 3600  # 1 hour (make value the same as SESSION_COOKIE_AGE)

@@ -49,7 +49,7 @@ class DrfJwtHelloApi(APIView):
         if action != "hello":
             return Response({"error": 'Invalid action. Expected "hello".'}, status=status.HTTP_400_BAD_REQUEST)
 
-        assert isinstance(request.auth, JWTAuthResult)
+        assert isinstance(request.auth, JWTAuthResult)  # nosec B101
 
         return Response(
             {

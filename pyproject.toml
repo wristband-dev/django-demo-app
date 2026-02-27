@@ -21,7 +21,7 @@ dependencies = [
     "gunicorn>=21.0.0",
     "whitenoise>=6.6.0",
     # __WRISTBAND__
-    "wristband-django-auth[drf]>=1.0.1",
+    "wristband-django-auth[drf]>=1.0.2",
 ]
 keywords = [
     "django",
